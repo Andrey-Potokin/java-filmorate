@@ -7,7 +7,6 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import ru.yandex.practicum.filmorate.annotation.ReleaseDateValid;
 
-import java.time.Duration;
 import java.time.LocalDate;
 
 @Getter

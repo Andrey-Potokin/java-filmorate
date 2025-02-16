@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import ru.yandex.practicum.filmorate.annotation.ValidBirthday;
 import ru.yandex.practicum.filmorate.annotation.ValidLogin;
-import ru.yandex.practicum.filmorate.annotation.ValidName;
 
 import java.time.LocalDate;
 
