@@ -128,9 +128,12 @@ public class UserControllerTest {
     @Test
     public void testUpdateUserNewEmail() throws IllegalAccessException {
         uc.create(user);
-        user.setEmail("new@mail.ru");
+        user.setId(1);
+        User updateUser = new User();
+        updateUser.setId(1);
+        updateUser.setEmail("new@mail.ru");
 
-        uc.update(user);
+        uc.update(updateUser);
 
         List<User> users = uc.getAll();
         assertEquals(1, users.size());
@@ -140,9 +143,12 @@ public class UserControllerTest {
     @Test
     public void testUpdateUserNewLogin() throws IllegalAccessException {
         uc.create(user);
-        user.setLogin("new-user");
+        user.setId(1);
+        User updateUser = new User();
+        updateUser.setId(1);
+        updateUser.setLogin("new-user");
 
-        uc.update(user);
+        uc.update(updateUser);
 
         List<User> users = uc.getAll();
         assertEquals(1, users.size());
@@ -152,9 +158,12 @@ public class UserControllerTest {
     @Test
     public void testUpdateUserNewName() throws IllegalAccessException {
         uc.create(user);
-        user.setName("Новый пользователь");
+        user.setId(1);
+        User updateUser = new User();
+        updateUser.setId(1);
+        updateUser.setName("Новый пользователь");
 
-        uc.update(user);
+        uc.update(updateUser);
 
         List<User> users = uc.getAll();
         assertEquals(1, users.size());
@@ -164,10 +173,13 @@ public class UserControllerTest {
     @Test
     public void testUpdateUserNewBirthday() throws IllegalAccessException {
         uc.create(user);
+        user.setId(1);
+        User updateUser = new User();
+        updateUser.setId(1);
         LocalDate newDate = LocalDate.of(2025, Month.JANUARY, 1);
-        user.setBirthday(newDate);
+        updateUser.setBirthday(newDate);
 
-        uc.update(user);
+        uc.update(updateUser);
 
         List<User> users = uc.getAll();
         assertEquals(1, users.size());

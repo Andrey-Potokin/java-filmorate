@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,28 +22,27 @@ public class FilmController {
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
         film.setId(getNextId());
-        films.put(film.getId(), new Film(film));
+        films.put(film.getId(), film);
         log.info("Фильм с id = {} создан", film.getId());
         return film;
     }
 
     @PutMapping
-    public Film update(@Valid @RequestBody Film newFilm) throws IllegalAccessException {
+    public Film update(@RequestBody Film newFilm) {
         if (newFilm.getId() == null) {
             log.error("Id должен быть указан");
             throw new ValidationException("Id должен быть указан");
         }
+
         if (films.containsKey(newFilm.getId())) {
-            Film updateFilm = films.get(newFilm.getId());
-            for (Field field : newFilm.getClass().getDeclaredFields()) {
-                field.setAccessible(true);
-                if (field.get(newFilm) != null) {
-                    field.set(updateFilm, field.get(newFilm));
-                }
-            }
-            films.replace(newFilm.getId(), updateFilm);
+            Film currentFilm = films.get(newFilm.getId());
+            if (newFilm.getName() != null) currentFilm.setName(newFilm.getName());
+            if (newFilm.getDescription() != null) currentFilm.setDescription(newFilm.getDescription());
+            if (newFilm.getReleaseDate() != null) currentFilm.setReleaseDate(newFilm.getReleaseDate());
+            if (newFilm.getDuration() != null) currentFilm.setDuration(newFilm.getDuration());
+            films.replace(newFilm.getId(), currentFilm);
             log.info("Фильм с id = {} обновлен", newFilm.getId());
-            return updateFilm;
+            return currentFilm;
         }
         log.error("Фильм с id = {} не найден", newFilm.getId());
         throw new NotFoundException("Фильм с id = " + newFilm.getId() + " не найден");

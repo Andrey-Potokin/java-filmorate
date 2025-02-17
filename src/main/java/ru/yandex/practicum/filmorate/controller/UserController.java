@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,28 +32,32 @@ public class UserController {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        users.put(user.getId(), new User(user));
+        users.put(user.getId(), user);
         log.info("Пользователь с id = {} создан", user.getId());
         return user;
     }
 
     @PutMapping
-    public User update(@Valid @RequestBody User newUser) throws IllegalAccessException {
+    public User update(@RequestBody User newUser) {
         if (newUser.getId() == null) {
             log.error("Id должен быть указан");
             throw new ValidationException("Id должен быть указан");
         }
+
         if (users.containsKey(newUser.getId())) {
-            User updateUser = users.get(newUser.getId());
-            for (Field field : newUser.getClass().getDeclaredFields()) {
-                field.setAccessible(true);
-                if (field.get(newUser) != null) {
-                    field.set(updateUser, field.get(newUser));
+            User currentUser = users.get(newUser.getId());
+                if (users.values().stream().noneMatch(user -> user.getEmail().equals(newUser.getEmail()))) {
+                    if (newUser.getEmail() != null) currentUser.setEmail(newUser.getEmail());
+                    if (newUser.getLogin() != null) currentUser.setLogin(newUser.getLogin());
+                    if (newUser.getName() != null) currentUser.setName(newUser.getName());
+                    if (newUser.getBirthday() != null) currentUser.setBirthday(newUser.getBirthday());
+                } else {
+                    log.error("Этот Email уже используется");
+                    throw new DuplicatedDataException("Этот Email уже используется");
                 }
-            }
-            users.replace(newUser.getId(), updateUser);
+            users.replace(newUser.getId(), currentUser);
             log.info("Пользователь с id = {} обновлен", newUser.getId());
-            return updateUser;
+            return currentUser;
         }
         log.error("Пользователь с id = {} не найден", newUser.getId());
         throw new NotFoundException("Пользователь с id = " + newUser.getId() + " не найден");
