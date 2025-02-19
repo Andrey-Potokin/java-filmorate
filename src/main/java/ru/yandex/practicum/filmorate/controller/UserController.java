@@ -34,6 +34,7 @@ public class UserController {
         }
         users.put(user.getId(), user);
         log.info("Пользователь с id = {} создан", user.getId());
+        log.debug(user.toString());
         return user;
     }
 

@@ -2,9 +2,9 @@ package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import ru.yandex.practicum.filmorate.annotation.ValidBirthday;
 import ru.yandex.practicum.filmorate.annotation.ValidLogin;
 
 import java.time.LocalDate;
@@ -20,6 +20,6 @@ public class User {
     private String login;
     private String name;
     @NotNull(message = "Дата рождения должна быть указана")
-    @ValidBirthday
+    @Past(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
 }
