@@ -2,78 +2,72 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.DuplicatedDataException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
-@RequestMapping("/users")
 @Slf4j
 public class UserController {
+    private  final UserStorage userStorage;
+    private final UserService userService;
 
-    private final Map<Integer, User> users = new HashMap<>();
-
-    @PostMapping
-    public User create(@Valid @RequestBody User user) {
-        for (User oldUser : users.values()) {
-            if (oldUser.getEmail().equals(user.getEmail())) {
-                log.error("Этот Email уже используется");
-                throw new DuplicatedDataException("Этот Email уже используется");
-            }
-        }
-        user.setId(getNextId());
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        users.put(user.getId(), user);
-        log.info("Пользователь с id = {} создан", user.getId());
-        return user;
+    @Autowired
+    public UserController(UserStorage userStorage, UserService userService) {
+        this.userStorage = userStorage;
+        this.userService = userService;
     }
 
-    @PutMapping
-    public User update(@RequestBody User newUser) {
-        if (newUser.getId() == null) {
-            log.error("Id должен быть указан");
-            throw new ValidationException("Id должен быть указан");
-        }
-
-        if (users.containsKey(newUser.getId())) {
-            User currentUser = users.get(newUser.getId());
-                if (users.values().stream().noneMatch(user -> user.getEmail().equals(newUser.getEmail()))) {
-                    if (newUser.getEmail() != null) currentUser.setEmail(newUser.getEmail());
-                    if (newUser.getLogin() != null) currentUser.setLogin(newUser.getLogin());
-                    if (newUser.getName() != null) currentUser.setName(newUser.getName());
-                    if (newUser.getBirthday() != null) currentUser.setBirthday(newUser.getBirthday());
-                } else {
-                    log.error("Этот Email уже используется");
-                    throw new DuplicatedDataException("Этот Email уже используется");
-                }
-            users.replace(newUser.getId(), currentUser);
-            log.info("Пользователь с id = {} обновлен", newUser.getId());
-            return currentUser;
-        }
-        log.error("Пользователь с id = {} не найден", newUser.getId());
-        throw new NotFoundException("Пользователь с id = " + newUser.getId() + " не найден");
+    @PostMapping(value = "/users")
+    @ResponseStatus(HttpStatus.CREATED)
+    public User createUser(@Valid @RequestBody User user) {
+        return userStorage.create(user);
     }
 
-    @GetMapping
-    public List<User> getAll() {
-        return new ArrayList<>(users.values());
+    @DeleteMapping(value = "/users/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteUser(@PathVariable Integer userId) {
+        userStorage.delete(userId);
     }
 
-    private int getNextId() {
-        int currentMaxId = users.keySet()
-                .stream()
-                .mapToInt(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @PutMapping(value = "/users")
+    @ResponseStatus(HttpStatus.OK)
+    public User updateUser(@RequestBody User newUser) {
+        return userStorage.update(newUser);
+    }
+
+    @GetMapping(value = "/users")
+    public List<User> findAllUsers() {
+        return userStorage.findAll();
+    }
+
+    @GetMapping(value = "/users/{userId}")
+    public User findById(@PathVariable Integer userId) {
+        return userStorage.findById(userId);
+    }
+
+    @PutMapping(value = "/users/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping(value = "/users/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        userService.deleteFriend(id, friendId);
+    }
+
+    @GetMapping(value = "/users/{id}/friends")
+    public List<User> findFriends(@PathVariable Integer id) {
+        return userService.findFriends(id);
+    }
+
+    @GetMapping(value = "/users/{id}/friends/common/{otherId}")
+    public List<User> findFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return userService.findCommonFriends(id, otherId);
     }
 }

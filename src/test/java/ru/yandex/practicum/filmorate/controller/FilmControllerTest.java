@@ -7,6 +7,7 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -18,14 +19,14 @@ import static org.junit.jupiter.api.Assertions.*;
 public class FilmControllerTest {
 
     private Validator validator;
-    private FilmController fc;
+    private InMemoryFilmStorage imfs;
     private Film film;
 
     @BeforeEach
     public void setUp() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
-        fc = new FilmController();
+        imfs = new InMemoryFilmStorage();
         film = new Film();
         film.setId(0);
         film.setName("Фильм");
@@ -126,58 +127,58 @@ public class FilmControllerTest {
     public void testCreateFilmWithDurationPositive() {
         film.setDuration(1);
 
-        fc.create(film);
+        imfs.create(film);
 
-        List<Film> films = fc.getAll();
+        List<Film> films = imfs.findAll();
         assertEquals(1, films.size());
         assertEquals(1, films.getFirst().getDuration());
     }
 
     @Test
-    public void testUpdateFilmNewName() throws IllegalAccessException {
-        fc.create(film);
+    public void testUpdateFilmNewName() {
+        imfs.create(film);
         film.setName("Новый фильм");
 
-        fc.update(film);
+        imfs.update(film);
 
-        List<Film> films = fc.getAll();
+        List<Film> films = imfs.findAll();
         assertEquals(1, films.size());
         assertEquals("Новый фильм", films.getFirst().getName());
     }
 
     @Test
-    public void testUpdateFilmNewDescription() throws IllegalAccessException {
-        fc.create(film);
+    public void testUpdateFilmNewDescription() {
+        imfs.create(film);
         film.setDescription("Новое описание фильма");
 
-        fc.update(film);
+        imfs.update(film);
 
-        List<Film> films = fc.getAll();
+        List<Film> films = imfs.findAll();
         assertEquals(1, films.size());
         assertEquals("Новое описание фильма", films.getFirst().getDescription());
     }
 
     @Test
-    public void testUpdateFilmNewReleaseDate() throws IllegalAccessException {
-        fc.create(film);
+    public void testUpdateFilmNewReleaseDate() {
+        imfs.create(film);
         LocalDate newDate = LocalDate.of(2025, Month.JANUARY, 1);
         film.setReleaseDate(newDate);
 
-        fc.update(film);
+        imfs.update(film);
 
-        List<Film> films = fc.getAll();
+        List<Film> films = imfs.findAll();
         assertEquals(1, films.size());
         assertEquals(newDate, films.getFirst().getReleaseDate());
     }
 
     @Test
-    public void testUpdateFilmNewDuration() throws IllegalAccessException {
-        fc.create(film);
+    public void testUpdateFilmNewDuration() {
+        imfs.create(film);
         film.setDuration(1000);
 
-        fc.update(film);
+        imfs.update(film);
 
-        List<Film> films = fc.getAll();
+        List<Film> films = imfs.findAll();
         assertEquals(1, films.size());
         assertEquals(1000, films.getFirst().getDuration());
     }

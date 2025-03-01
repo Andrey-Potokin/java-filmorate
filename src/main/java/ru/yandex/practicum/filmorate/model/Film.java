@@ -9,6 +9,8 @@ import lombok.EqualsAndHashCode;
 import ru.yandex.practicum.filmorate.annotation.ReleaseDateValid;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @EqualsAndHashCode(of = "id")
@@ -26,4 +28,13 @@ public class Film {
     @NotNull(message = "Длительность фильма не может быть пустой")
     @Positive(message = "Длительность фильма должна быть больше 0")
     private Integer duration;
+    private Set<User> likes = new HashSet<>();
+
+    public void addLike(User user) {
+        likes.add(user);
+    }
+
+    public void deleteLike(User user) {
+        likes.remove(user);
+    }
 }
