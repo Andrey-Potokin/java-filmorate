@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.film;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ru.yandex.practicum.filmorate.annotation.ReleaseDateValid;
+import ru.yandex.practicum.filmorate.model.user.User;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -28,7 +29,17 @@ public class Film {
     @NotNull(message = "Длительность фильма не может быть пустой")
     @Positive(message = "Длительность фильма должна быть больше 0")
     private Integer duration;
+    private MpaRating mpa;
+    private Set<Genre> genres = new HashSet<>();
     private Set<User> likes = new HashSet<>();
+
+    public void addGenre(Genre genre) {
+        genres.add(genre);
+    }
+
+    public void deleteGenre(Genre genre) {
+        genres.remove(genre);
+    }
 
     public void addLike(User user) {
         likes.add(user);

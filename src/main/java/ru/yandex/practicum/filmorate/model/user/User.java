@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +23,7 @@ public class User {
     @NotNull(message = "Дата рождения должна быть указана")
     @ValidBirthday
     private LocalDate birthday;
+    private FriendshipStatus friendshipStatus;
     private final Set<Integer> friends = new HashSet<>();
 
     public void addFriend(Integer id) {
