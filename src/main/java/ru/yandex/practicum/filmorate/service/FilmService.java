@@ -3,8 +3,8 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -37,10 +37,12 @@ public class FilmService {
 
     public List<Film> findPopularFilms(Integer count) {
         log.info("Пользователь получил список популярных фильмов");
-        return filmStorage.findAll().stream()
+        List<Film> films = filmStorage.findAll().stream()
                 .filter(film -> film.getLikes() != null)
                 .sorted((film1, film2) -> Integer.compare(film2.getLikes().size(), film1.getLikes().size()))
                 .limit(count)
                 .collect(Collectors.toList());
+        log.debug("Список популярных фильмов: {}", films.toString());
+        return films;
     }
 }
