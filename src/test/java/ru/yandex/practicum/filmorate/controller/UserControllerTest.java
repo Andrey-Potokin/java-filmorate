@@ -7,7 +7,7 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.DuplicatedDataException;
-import ru.yandex.practicum.filmorate.model.user.User;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
@@ -30,7 +30,7 @@ public class UserControllerTest {
         validator = factory.getValidator();
         imus = new InMemoryUserStorage();
         user = new User();
-        user.setId(0);
+        user.setId(0L);
         user.setEmail("user@mail.ru");
         user.setName("Пользователь");
         user.setLogin("user");
@@ -129,9 +129,9 @@ public class UserControllerTest {
     @Test
     public void testUpdateUserNewEmail() {
         imus.create(user);
-        user.setId(1);
+        user.setId(1L);
         User updateUser = new User();
-        updateUser.setId(1);
+        updateUser.setId(1L);
         updateUser.setEmail("new@mail.ru");
 
         imus.update(updateUser);
@@ -144,9 +144,9 @@ public class UserControllerTest {
     @Test
     public void testUpdateUserNewLogin() {
         imus.create(user);
-        user.setId(1);
+        user.setId(1L);
         User updateUser = new User();
-        updateUser.setId(1);
+        updateUser.setId(1L);
         updateUser.setLogin("new-user");
 
         imus.update(updateUser);
@@ -159,9 +159,9 @@ public class UserControllerTest {
     @Test
     public void testUpdateUserNewName() {
         imus.create(user);
-        user.setId(1);
+        user.setId(1L);
         User updateUser = new User();
-        updateUser.setId(1);
+        updateUser.setId(1L);
         updateUser.setName("Новый пользователь");
 
         imus.update(updateUser);
@@ -174,9 +174,9 @@ public class UserControllerTest {
     @Test
     public void testUpdateUserNewBirthday() {
         imus.create(user);
-        user.setId(1);
+        user.setId(1L);
         User updateUser = new User();
-        updateUser.setId(1);
+        updateUser.setId(1L);
         LocalDate newDate = LocalDate.of(2025, Month.JANUARY, 1);
         updateUser.setBirthday(newDate);
 

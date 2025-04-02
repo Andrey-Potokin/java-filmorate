@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.validator;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import ru.yandex.practicum.filmorate.annotation.ValidName;
-import ru.yandex.practicum.filmorate.model.user.User;
+import ru.yandex.practicum.filmorate.model.User;
 
 public class NameValidator implements ConstraintValidator<ValidName, User> {
 

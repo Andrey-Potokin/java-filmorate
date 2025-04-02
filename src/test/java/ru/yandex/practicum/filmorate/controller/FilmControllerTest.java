@@ -6,7 +6,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.LocalDate;
@@ -28,7 +28,7 @@ public class FilmControllerTest {
         validator = factory.getValidator();
         imfs = new InMemoryFilmStorage();
         film = new Film();
-        film.setId(0);
+        film.setId(0L);
         film.setName("Фильм");
         film.setDescription("Описание фильма");
         film.setReleaseDate(LocalDate.of(2025, Month.JANUARY, 1));
