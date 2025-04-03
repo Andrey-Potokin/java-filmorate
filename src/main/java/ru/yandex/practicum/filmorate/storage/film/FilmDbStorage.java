@@ -24,6 +24,13 @@ public class FilmDbStorage implements FilmStorage {
     private final GenreService genreService;
     private final LikeStorage likeStorage;
 
+    private static final String UPDATE_QUERY = "UPDATE films SET name = ?, description = ?, release_date = ?," +
+            " duration = ?, rating_id = ? WHERE id = ?";
+    private static final String DELETE_QUERY = "DELETE FROM films WHERE id = ? ";
+    private static final String FIND_ALL_QUERY = "SELECT * FROM films";
+    private static final String FIND_BY_ID_QUERY = "SELECT * FROM films WHERE id = ?";
+
+
     @Autowired
     public FilmDbStorage(JdbcTemplate jdbcTemplate, MpaService mpaService, GenreService genreService,
                          LikeStorage likeStorage) {
@@ -31,22 +38,6 @@ public class FilmDbStorage implements FilmStorage {
         this.mpaService = mpaService;
         this.genreService = genreService;
         this.likeStorage = likeStorage;
-    }
-
-    @Override
-    public List<Film> findAll() {
-        String sql = "SELECT * FROM films";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
-                rs.getLong("id"),
-                rs.getString("name"),
-                rs.getString("description"),
-                rs.getDate("release_Date").toLocalDate(),
-                rs.getInt("duration"),
-                new HashSet<>(likeStorage.getLikes(rs.getLong("id"))),
-                mpaService.getMpaById(rs.getInt("rating_id")),
-                genreService.getFilmGenres(rs.getLong("id")))
-        );
-
     }
 
     @Override
@@ -71,10 +62,7 @@ public class FilmDbStorage implements FilmStorage {
         if (film == null) {
             throw new ValidationException("Передан пустой аргумент!");
         }
-        String sqlQuery = "UPDATE films SET " +
-                "name = ?, description = ?, release_date = ?, duration = ?, " +
-                "rating_id = ? WHERE id = ?";
-        if (jdbcTemplate.update(sqlQuery,
+        if (jdbcTemplate.update(UPDATE_QUERY,
                 film.getName(),
                 film.getDescription(),
                 film.getReleaseDate(),
@@ -99,12 +87,36 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public void delete(Long filmId) {
+        if (filmId == null) {
+            throw new ValidationException("Передан пустой аргумент!");
+        }
+        if (jdbcTemplate.update(DELETE_QUERY, filmId) == 0) {
+            throw new NotFoundException("Фильм с ID=" + filmId + " не найден!");
+        }
+    }
+
+    @Override
+    public List<Film> findAll() {
+        return jdbcTemplate.query(FIND_ALL_QUERY, (rs, rowNum) -> new Film(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getDate("release_Date").toLocalDate(),
+                rs.getInt("duration"),
+                new HashSet<>(likeStorage.getLikes(rs.getLong("id"))),
+                mpaService.getMpaById(rs.getInt("rating_id")),
+                genreService.getFilmGenres(rs.getLong("id")))
+        );
+    }
+
+    @Override
     public Film findById(Long filmId) {
         if (filmId == null) {
             throw new ValidationException("Передан пустой аргумент!");
         }
         Film film;
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("SELECT * FROM films WHERE id = ?", filmId);
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(FIND_BY_ID_QUERY, filmId);
         if (filmRows.first()) {
             Mpa mpa = mpaService.getMpaById(filmRows.getInt("rating_id"));
             Set<Genre> genres = genreService.getFilmGenres(filmId);
@@ -124,16 +136,5 @@ public class FilmDbStorage implements FilmStorage {
             film.setGenres(null);
         }
         return film;
-    }
-
-    @Override
-    public void delete(Long filmId) {
-        if (filmId == null) {
-            throw new ValidationException("Передан пустой аргумент!");
-        }
-        String sqlQuery = "DELETE FROM films WHERE id = ? ";
-        if (jdbcTemplate.update(sqlQuery, filmId) == 0) {
-            throw new NotFoundException("Фильм с ID=" + filmId + " не найден!");
-        }
     }
 }

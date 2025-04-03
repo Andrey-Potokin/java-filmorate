@@ -13,6 +13,8 @@ import java.util.List;
 @Component
 public class MpaStorage {
     private final JdbcTemplate jdbcTemplate;
+    private static final String GET_ALL_QUERY = "SELECT * FROM ratings_mpa";
+    private static final String GET_BY_ID_QUERY = "SELECT * FROM ratings_mpa WHERE id = ?";
 
     @Autowired
     public MpaStorage(JdbcTemplate jdbcTemplate) {
@@ -20,8 +22,7 @@ public class MpaStorage {
     }
 
     public List<Mpa> getAllMpa() {
-        String sql = "SELECT * FROM ratings_mpa";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new Mpa(
+        return jdbcTemplate.query(GET_ALL_QUERY, (rs, rowNum) -> new Mpa(
                 rs.getInt("id"),
                 rs.getString("name"))
         );
@@ -32,7 +33,7 @@ public class MpaStorage {
             throw new ValidationException("Передан пустой аргумент!");
         }
         Mpa mpa;
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("SELECT * FROM ratings_mpa WHERE id = ?", mpaId);
+        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(GET_BY_ID_QUERY, mpaId);
         if (mpaRows.first()) {
             mpa = new Mpa(
                     mpaRows.getInt("id"),

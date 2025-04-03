@@ -15,25 +15,17 @@ import java.util.List;
 @Slf4j
 @Component("userDbStorage")
 public class UserDbStorage implements UserStorage {
-
     private final JdbcTemplate jdbcTemplate;
+
+    private static final String UPDATE_QUERY = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ?" +
+            " WHERE id = ?";
+    private static final String DELETE_QUERY = "DELETE FROM users WHERE id = ? ";
+    private static final String FIND_ALL_QUERY = "SELECT * FROM users";
+    private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE id = ?";
 
     @Autowired
     public UserDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-    }
-
-    @Override
-    public List<User> findAll() {
-        String sql = "SELECT * FROM users";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new User(
-                rs.getLong("id"),
-                rs.getString("email"),
-                rs.getString("login"),
-                rs.getString("name"),
-                rs.getDate("birthday").toLocalDate(),
-                null)
-        );
     }
 
     @Override
@@ -52,10 +44,7 @@ public class UserDbStorage implements UserStorage {
             throw new ValidationException("Передан пустой аргумент!");
         }
         if (findById(user.getId()) != null) {
-            String sqlQuery = "UPDATE users SET " +
-                    "email = ?, login = ?, name = ?, birthday = ? " +
-                    "WHERE id = ?";
-            jdbcTemplate.update(sqlQuery,
+            jdbcTemplate.update(UPDATE_QUERY,
                     user.getEmail(),
                     user.getLogin(),
                     user.getName(),
@@ -69,12 +58,35 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
+    public void delete(Long userId) {
+        if (userId == null) {
+            throw new ValidationException("Передан пустой аргумент!");
+        }
+        if (jdbcTemplate.update(DELETE_QUERY, userId) == 0) {
+            throw new NotFoundException("Пользователь с ID=" + userId + " не найден!");
+        }
+    }
+
+    @Override
+    public List<User> findAll() {
+        log.info("Получен список всех пользователей");
+        return jdbcTemplate.query(FIND_ALL_QUERY, (rs, rowNum) -> new User(
+                rs.getLong("id"),
+                rs.getString("email"),
+                rs.getString("login"),
+                rs.getString("name"),
+                rs.getDate("birthday").toLocalDate(),
+                null)
+        );
+    }
+
+    @Override
     public User findById(Long userId) {
         if (userId == null) {
             throw new ValidationException("Передан пустой аргумент!");
         }
         User user;
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM users WHERE id = ?", userId);
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet(FIND_BY_ID_QUERY, userId);
         if (userRows.first()) {
             user = new User(
                     userRows.getLong("id"),
@@ -87,16 +99,5 @@ public class UserDbStorage implements UserStorage {
             throw new NotFoundException("Пользователь с ID=" + userId + " не найден!");
         }
         return user;
-    }
-
-    @Override
-    public void delete(Long userId) {
-        if (userId == null) {
-            throw new ValidationException("Передан пустой аргумент!");
-        }
-        String sqlQuery = "DELETE FROM users WHERE id = ? ";
-        if (jdbcTemplate.update(sqlQuery, userId) == 0) {
-            throw new NotFoundException("Пользователь с ID=" + userId + " не найден!");
-        }
     }
 }

@@ -9,7 +9,6 @@ import lombok.Data;
 import ru.yandex.practicum.filmorate.annotation.ReleaseDateValid;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,9 +30,6 @@ public class Film {
     private Mpa mpa;
     private Set<Genre> genres;
 
-    public Film() {
-    }
-
     public Film(Long id, String name, String description, LocalDate releaseDate, Integer duration,
                 Set<Long> likes, Mpa mpa, Set<Genre> genres) {
         this.id = id;
@@ -47,12 +43,12 @@ public class Film {
     }
 
     public Map<String, Object> toMap() {
-        Map<String, Object> values = new HashMap<>();
-        values.put("name", name);
-        values.put("description", description);
-        values.put("release_Date", releaseDate);
-        values.put("duration", duration);
-        values.put("rating_id", mpa.getId());
-        return values;
+        return Map.of(
+                "name", name,
+                "description", description,
+                "release_Date", releaseDate,
+                "duration", duration,
+                "rating_id", mpa.getId()
+        );
     }
 }

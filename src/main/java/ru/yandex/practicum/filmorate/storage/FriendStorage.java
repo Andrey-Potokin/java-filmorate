@@ -7,12 +7,21 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class FriendStorage {
     private final JdbcTemplate jdbcTemplate;
     private final UserStorage userStorage;
+
+    private static final String INSERT_QUERY = "INSERT INTO friends (user_id, friend_id, status) VALUES (?, ?, ?)";
+    private static final String UPDATE_QUERY = "UPDATE friends SET user_id = ? AND friend_id = ? AND status = ? " +
+            "WHERE user_id = ? AND friend_id = ?";
+    private static final String DELETE_QUERY = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
+    private static final String GET_ALL_QUERY = "SELECT friend_id, email, login, name, birthday FROM friends" +
+            " INNER JOIN users ON friends.friend_id = users.id WHERE friends.user_id = ?";
+    private static final String GET_FRIENDS_QUERY = "SELECT friend_id FROM friends WHERE user_id = ?";
 
     @Autowired
     public FriendStorage(JdbcTemplate jdbcTemplate, @Qualifier("userDbStorage") UserStorage userStorage) {
@@ -27,12 +36,9 @@ public class FriendStorage {
             boolean status = false;
             if (friend.getFriends().contains(userId)) {
                 status = true;
-                String sql = "UPDATE friends SET user_id = ? AND friend_id = ? AND status = ? " +
-                        "WHERE user_id = ? AND friend_id = ?";
-                jdbcTemplate.update(sql, friendId, userId, true, friendId, userId);
+                jdbcTemplate.update(UPDATE_QUERY, friendId, userId, true, friendId, userId);
             }
-            String sql = "INSERT INTO friends (user_id, friend_id, status) VALUES (?, ?, ?)";
-            jdbcTemplate.update(sql, userId, friendId, status);
+            jdbcTemplate.update(INSERT_QUERY, userId, friendId, status);
         }
     }
 
@@ -40,12 +46,9 @@ public class FriendStorage {
         User user = userStorage.findById(userId);
         User friend = userStorage.findById(friendId);
         if ((user != null) && (friend != null)) {
-            String sql = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
-            jdbcTemplate.update(sql, userId, friendId);
+            jdbcTemplate.update(DELETE_QUERY, userId, friendId);
             if (friend.getFriends().contains(userId)) {
-                sql = "UPDATE friends SET user_id = ? AND friend_id = ? AND status = ? " +
-                        "WHERE user_id = ? AND friend_id = ?";
-                jdbcTemplate.update(sql, friendId, userId, false, friendId, userId);
+                jdbcTemplate.update(UPDATE_QUERY, friendId, userId, false, friendId, userId);
             }
         }
     }
@@ -53,9 +56,7 @@ public class FriendStorage {
     public List<User> getFriends(Long userId) {
         User user = userStorage.findById(userId);
         if (user != null) {
-            String sql = "SELECT friend_id, email, login, name, birthday FROM friends" +
-                    " INNER JOIN users ON friends.friend_id = users.id WHERE friends.user_id = ?";
-            return jdbcTemplate.query(sql, (rs, rowNum) -> new User(
+            return jdbcTemplate.query(GET_ALL_QUERY, (rs, rowNum) -> new User(
                             rs.getLong("friend_id"),
                             rs.getString("email"),
                             rs.getString("login"),
@@ -67,5 +68,28 @@ public class FriendStorage {
         } else {
             return null;
         }
+    }
+
+    public List<User> findCommonFriends(Long firstUserId, Long secondUserId) {
+        List<Long> friendsUser1 = jdbcTemplate.query(GET_FRIENDS_QUERY,
+                new Object[]{firstUserId},
+                (rs, rowNum) -> rs.getLong("friend_id")
+        );
+
+        List<Long> friendsUser2 = jdbcTemplate.query(GET_FRIENDS_QUERY,
+                new Object[]{secondUserId},
+                (rs, rowNum) -> rs.getLong("friend_id")
+        );
+
+        List<User> commonFriends = new ArrayList<>();
+        for (Long friendId : friendsUser1) {
+            if (friendsUser2.contains(friendId)) {
+                User friend = userStorage.findById(friendId);
+                if (friend != null) {
+                    commonFriends.add(friend);
+                }
+            }
+        }
+        return commonFriends;
     }
 }
