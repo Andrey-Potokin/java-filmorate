@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.service;
 
-import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -54,9 +53,6 @@ public class FilmService {
     }
 
     public List<Film> findPopular(Integer count) {
-        if (count < 1) {
-            throw new ValidationException("Количество фильмов для вывода не должно быть меньше 1");
-        }
         return likeStorage.getPopular(count);
     }
 }
