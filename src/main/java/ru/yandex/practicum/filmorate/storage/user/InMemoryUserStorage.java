@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.DuplicatedDataException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.user.User;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +15,7 @@ import java.util.Map;
 @Component
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
-    private final Map<Integer, User> users = new HashMap<>();
+    private final Map<Long, User> users = new HashMap<>();
 
     @Override
     public User create(User user) {
@@ -35,7 +35,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void delete(Integer id) {
+    public void delete(Long id) {
         if (id == null) {
             log.error("Id должен быть указан");
             throw new ValidationException("Id должен быть указан");
@@ -82,7 +82,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User findById(Integer id) {
+    public User findById(Long id) {
         if (id == null) {
             log.error("Id должен быть указан");
             throw new ValidationException("Id должен быть указан");
@@ -95,10 +95,10 @@ public class InMemoryUserStorage implements UserStorage {
         throw new NotFoundException("Пользователь с id = " + id + " не найден");
     }
 
-    private int getNextId() {
-        int currentMaxId = users.keySet()
+    private long getNextId() {
+        long currentMaxId = users.keySet()
                 .stream()
-                .mapToInt(id -> id)
+                .mapToLong(id -> id)
                 .max()
                 .orElse(0);
         return ++currentMaxId;

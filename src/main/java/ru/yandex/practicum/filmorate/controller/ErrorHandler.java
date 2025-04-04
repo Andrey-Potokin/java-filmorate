@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.exception.DuplicatedDataException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.ErrorResponse;
 
 @RestControllerAdvice
 public class ErrorHandler {
@@ -34,15 +35,6 @@ public class ErrorHandler {
     public ErrorResponse handleDuplicatedData(final DuplicatedDataException e) {
         return new ErrorResponse(
                 "Ошибка дублирования!",
-                e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleRuntime(final RuntimeException e) {
-        return new ErrorResponse(
-                "Ошибка сервера!",
                 e.getMessage()
         );
     }

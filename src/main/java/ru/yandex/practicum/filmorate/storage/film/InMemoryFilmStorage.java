@@ -4,7 +4,7 @@ import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import java.util.Map;
 @Component
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
-    private final Map<Integer, Film> films = new HashMap<>();
+    private final Map<Long, Film> films = new HashMap<>();
 
     @Override
     public Film create(Film film) {
@@ -25,7 +25,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void delete(Integer id) {
+    public void delete(Long id) {
         if (id == null) {
             log.error("Id должен быть указан");
             throw new ValidationException("Id должен быть указан");
@@ -67,7 +67,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film findById(Integer id) {
+    public Film findById(Long id) {
         if (id == null) {
             log.error("Id должен быть указан");
             throw new ValidationException("Id должен быть указан");
@@ -80,10 +80,10 @@ public class InMemoryFilmStorage implements FilmStorage {
         throw new NotFoundException("Фильм с id = " + id + " не найден");
     }
 
-    private int getNextId() {
-        int currentMaxId = films.keySet()
+    private long getNextId() {
+        long currentMaxId = films.keySet()
                 .stream()
-                .mapToInt(id -> id)
+                .mapToLong(id -> id)
                 .max()
                 .orElse(0);
         return ++currentMaxId;

@@ -1,9 +1,0 @@
-logging:
-  level:
-    org:
-      zalando:
-        logbook: TRACE
-    ru:
-      yandex:
-        practicum:
-          filmorate: DEBUG
